@@ -90,4 +90,4 @@ L’application front-end attend une API REST compatible avec les routes suivant
 
 ## Licence
 
-MIT
+Cette application est sous licence de El Mimine ! 
