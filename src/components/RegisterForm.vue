@@ -2,8 +2,8 @@
   <div class="auth-container">
     <h2>Inscription</h2>
     <form @submit.prevent="register">
-      <input v-model="firstName" type="text" placeholder="Prénom" required pattern="^[\wÀ-ÿ' -]{2,30}$" />
-      <input v-model="lastName" type="text" placeholder="Nom" required pattern="^[\wÀ-ÿ' -]{2,30}$" />
+  <input v-model="firstName" type="text" placeholder="Prénom" required pattern=".{2,30}" />
+  <input v-model="lastName" type="text" placeholder="Nom" required pattern=".{2,30}" />
       <input v-model="email" type="email" placeholder="Email" required autocomplete="email" />
       <input v-model="password" type="password" placeholder="Mot de passe (min 8 caractères)" required minlength="8" autocomplete="new-password" />
       <button type="submit">S'inscrire</button>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { apiFetch } from '@/utils/api';
+import { apiFetch } from '../utils/api';
 
 export default {
   name: 'RegisterForm',
@@ -30,9 +30,8 @@ export default {
   methods: {
     async register() {
       this.error = ''
-      const regex = /^[\wÀ-ÿ' -]{2,30}$/
-      if (!regex.test(this.firstName) || !regex.test(this.lastName)) {
-        this.error = 'Nom ou prénom invalide.'
+      if (!this.firstName || !this.lastName) {
+        this.error = 'Nom et prénom requis.'
         return
       }
       if (this.password.length < 8) {
@@ -43,16 +42,26 @@ export default {
         await apiFetch('auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+          body: {
             firstName: this.firstName,
             lastName: this.lastName,
             email: this.email,
             password: this.password
-          })
+          }
         })
         this.$emit('register')
       } catch (e) {
-        this.error = e.message || "Erreur réseau ou serveur."
+        // Affiche le message d’erreur du back si disponible
+        if (e && e.message && e.message.startsWith('{')) {
+          try {
+            const errObj = JSON.parse(e.message)
+            this.error = errObj.error || 'Erreur serveur.'
+          } catch {
+            this.error = e.message
+          }
+        } else {
+          this.error = e.message || 'Erreur réseau ou serveur.'
+        }
       }
     }
   }

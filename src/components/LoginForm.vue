@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { apiFetch } from '@/utils/api';
+import { apiFetch } from '../utils/api';
 
 export default {
   name: 'LoginForm',
@@ -39,7 +39,10 @@ export default {
         const user = await apiFetch('auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.email, password: this.password })
+          body: {
+            email: this.email,
+            password: this.password
+          }
         })
         this.$emit('login', user)
       } catch (e) {

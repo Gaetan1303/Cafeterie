@@ -1,5 +1,3 @@
-
-
 import { createRouter, createWebHistory } from 'vue-router';
 
 // Guards centralisés (à compléter selon besoins)
@@ -25,14 +23,14 @@ const routes = [
   {
     path: '/events',
     name: 'Events',
-    component: () => import('./views/HistoryView.vue'), // ou EventView si tu en crées un
+    component: () => import('./views/EventView.vue'),
     // meta: { requiresAuth: true }
   },
   {
     path: '/machines',
     name: 'Machines',
-    component: () => import('./views/DashboardView.vue'), // à remplacer par MachineView si besoin
-    // meta: { requiresAuth: true, requiresAdmin: true }
+    component: () => import('./views/MachineView.vue'),
+    // meta: { requiresAuth: true }
   },
   {
     path: '/purchases',
@@ -44,7 +42,7 @@ const routes = [
     path: '/stock',
     name: 'Stock',
     component: () => import('./views/StockView.vue'),
-    // meta: { requiresAuth: true, requiresAdmin: true }
+    // meta: { requiresAuth: true }
   },
   {
     path: '/stock-history',
