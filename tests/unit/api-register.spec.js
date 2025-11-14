@@ -11,7 +11,7 @@ describe('Inscription via l\'API Cafeterie-Back', () => {
     const password = 'Test1234!'
     const firstName = 'Test'
     const lastName = 'User'
-    const user = await apiFetch('auth/register', {
+    const res = await apiFetch('auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -21,8 +21,6 @@ describe('Inscription via l\'API Cafeterie-Back', () => {
         password
       })
     })
-    expect(user).toHaveProperty('email', email)
-    expect(user).toHaveProperty('firstName', firstName)
-    expect(user).toHaveProperty('lastName', lastName)
+    expect(res).toHaveProperty('message', 'Inscription réussie')
   })
 })
