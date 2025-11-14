@@ -6,6 +6,7 @@
 </template>
 
 <script>
+
 import LoginForm from '../components/LoginForm.vue'
 import RegisterForm from '../components/RegisterForm.vue'
 
@@ -19,12 +20,15 @@ export default {
   },
   methods: {
     onLogin(user) {
-      // Simuler la sauvegarde du user (à remplacer par store/API)
+      // Si le back renvoie un token, le stocker
+      if (user && user.token) {
+        localStorage.setItem('token', user.token)
+      }
       localStorage.setItem('user', JSON.stringify(user))
       this.$router.push('/dashboard')
     },
-    onRegister(user) {
-      // Simuler l'inscription (à remplacer par API)
+    onRegister() {
+      // Afficher un message de succès après inscription
       alert('Inscription réussie ! Connectez-vous.')
       this.mode = 'login'
     }

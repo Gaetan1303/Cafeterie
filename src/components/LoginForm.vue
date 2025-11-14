@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import { apiFetch } from '@/utils/api';
+
 export default {
   name: 'LoginForm',
   data() {
@@ -24,7 +26,6 @@ export default {
   methods: {
     async login() {
       this.error = ''
-      // Validation basique anti-XSS côté client
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(this.email)) {
         this.error = 'Email invalide.'
@@ -35,20 +36,14 @@ export default {
         return
       }
       try {
-  const response = await fetch('/login', {
+        const user = await apiFetch('auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: this.email, password: this.password })
         })
-        if (!response.ok) {
-          const data = await response.json()
-          this.error = data.message || 'Erreur de connexion'
-          return
-        }
-        const user = await response.json()
         this.$emit('login', user)
       } catch (e) {
-        this.error = "Erreur réseau ou serveur."
+        this.error = e.message || "Erreur réseau ou serveur."
       }
     }
   }

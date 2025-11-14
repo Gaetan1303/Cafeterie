@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { apiFetch } from '@/utils/api';
+
 export default {
   name: 'RegisterForm',
   data() {
@@ -28,7 +30,6 @@ export default {
   methods: {
     async register() {
       this.error = ''
-      // Validation XSS simple côté client
       const regex = /^[\wÀ-ÿ' -]{2,30}$/
       if (!regex.test(this.firstName) || !regex.test(this.lastName)) {
         this.error = 'Nom ou prénom invalide.'
@@ -39,7 +40,7 @@ export default {
         return
       }
       try {
-  const response = await fetch('/register', {
+        await apiFetch('auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -49,14 +50,9 @@ export default {
             password: this.password
           })
         })
-        if (!response.ok) {
-          const data = await response.json()
-          this.error = data.message || 'Erreur lors de l\'inscription'
-          return
-        }
         this.$emit('register')
       } catch (e) {
-        this.error = "Erreur réseau ou serveur."
+        this.error = e.message || "Erreur réseau ou serveur."
       }
     }
   }

@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { apiFetch, API_BASE_URL } from '@/utils/api';
+
 export default {
   name: 'ProfileView',
   data() {
@@ -32,19 +34,14 @@ export default {
       this.error = ''
       try {
         const token = localStorage.getItem('token')
-        const response = await fetch('/users/me', {
+        const user = await apiFetch('profile/me', {
           headers: { 'Authorization': token ? `Bearer ${token}` : '' }
         })
-        if (!response.ok) {
-          this.error = 'Erreur lors de la récupération du profil.'
-          return
-        }
-        const user = await response.json()
         this.firstName = user.firstName
         this.lastName = user.lastName
         this.email = user.email
       } catch (e) {
-        this.error = 'Erreur réseau ou serveur.'
+        this.error = 'Erreur lors de la récupération du profil.'
       }
     },
     async updateProfile() {
@@ -57,7 +54,7 @@ export default {
       }
       try {
         const token = localStorage.getItem('token')
-        const response = await fetch('/users/me', {
+        await apiFetch('profile/me', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -68,13 +65,9 @@ export default {
             lastName: this.lastName
           })
         })
-        if (!response.ok) {
-          this.error = 'Erreur lors de la mise à jour.'
-          return
-        }
         this.success = true
       } catch (e) {
-        this.error = 'Erreur réseau ou serveur.'
+        this.error = 'Erreur lors de la mise à jour.'
       }
     }
   },
