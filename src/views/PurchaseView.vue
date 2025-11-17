@@ -1,4 +1,5 @@
 import { formSchemas, validateForm } from '../utils/formSchema';
+import { useRouter } from 'vue-router';
 <template>
   <div>
     <h1>Mes achats</h1>
@@ -32,6 +33,8 @@ import { formSchemas, validateForm } from '../utils/formSchema';
     <p v-if="error" style="color:red">{{ error }}</p>
   </div>
 </template>
+
+
 <script setup>
 
 
@@ -47,6 +50,7 @@ async function deletePurchase(id) {
     toastStore.showToast(e?.message || 'Erreur lors de la suppression', 'error');
   }
 }
+
 
 const router = useRouter();
 const userStore = useUserStore();
