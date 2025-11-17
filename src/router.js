@@ -1,15 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from './store/userStore';
 
-// Guards centralisés (à compléter selon besoins)
-// Exemple : import { requireAuth, requireAdmin } from './guards';
+// Guards centralisés
 
 const routes = [
-  {
-    path: '/api-routes',
-    name: 'ApiRoutes',
-    component: () => import('./views/ApiRoutesView.vue'),
-  },
   {
     path: '/achat',
     name: 'Achat',
