@@ -104,17 +104,3 @@ async function handleRestock() {
   }
 }
 </script>
-    <ul>
-      <li v-for="item in paginatedItems" :key="item._id">
-        <b>{{ item.type }}</b> ({{ item.category }}) : {{ item.quantity }}
-        <button @click="selectItem(item)">Détail</button>
-      </li>
-    </ul>
-    <div style="margin: 1em 0;">
-      <button @click="prevPage" :disabled="page === 1">&lt; Précédent</button>
-      Page {{ page }} / {{ pageCount }}
-      <button @click="nextPage" :disabled="page === pageCount">Suivant &gt;</button>
-      <span v-if="error" style="color:red">{{ error.message || error }}</span>
-      <span v-if="loading">Chargement...</span>
-    </div>
-}
