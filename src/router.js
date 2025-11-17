@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from './store/userStore';
+// Import statique pour éviter les problèmes de chargement dynamique du chunk AuthView
+import AuthView from './views/AuthView.vue';
 
 // Guards centralisés
 
@@ -30,7 +32,7 @@ const routes = [
   {
     path: '/auth',
     name: 'Auth',
-    component: () => import('./views/AuthView.vue'),
+    component: AuthView,
   },
   {
     path: '/profile',
