@@ -22,7 +22,7 @@
 <script setup>
 import { sanitizeInput } from '../utils/sanitize';
 import { formSchemas, validateForm } from '../utils/formSchema';
-import { useUserStore } from '../store';
+import { useUserStore } from '../store/userStore';
 const userStore = useUserStore();
 const toastStore = useToastStore();
 const profile = ref(null);
