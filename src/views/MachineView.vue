@@ -106,7 +106,15 @@ const machines = ref([]);
 const error = ref('');
 if (userStore.token) {
   getMachines(userStore.token)
-    .then(data => { machines.value = Array.isArray(data) ? data : []; })
+    .then(data => {
+      if (Array.isArray(data)) {
+        machines.value = data;
+      } else if (data && Array.isArray(data.machines)) {
+        machines.value = data.machines;
+      } else {
+        machines.value = [];
+      }
+    })
     .catch(e => { error.value = e?.message || 'Erreur lors du chargement des machines.'; });
 } else {
   error.value = 'Veuillez vous connecter pour voir les machines.';
