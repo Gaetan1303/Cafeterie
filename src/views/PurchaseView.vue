@@ -1,5 +1,5 @@
 import { formSchemas, validateForm } from '../utils/formSchema';
-import { useRouter } from 'vue-router';
+
 <template>
   <div>
     <h1>Mes achats</h1>
@@ -35,7 +35,9 @@ import { useRouter } from 'vue-router';
 </template>
 
 
+
 <script setup>
+import { useRouter } from 'vue-router';
 
 
 import { apiFetch } from '../utils/api';
