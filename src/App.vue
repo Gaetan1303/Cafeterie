@@ -3,7 +3,7 @@
   <nav style="display: flex; gap: 1rem; margin-bottom: 2rem;">
     <router-link to="/">Accueil</router-link>
     <router-link to="/auth" v-if="!isLoggedIn">Connexion / Inscription</router-link>
-    <router-link to="/dashboard" v-if="isLoggedIn">Dashboard</router-link>
+  <router-link to="/dashboard" v-if="isAdmin">Dashboard</router-link>
     <router-link to="/achat" v-if="isLoggedIn">Pointage achat</router-link>
     <router-link to="/stock" v-if="isAdmin">Stock</router-link>
     <router-link to="/historique" v-if="isLoggedIn">Historique</router-link>
@@ -31,7 +31,7 @@ export default {
     const loaderStore = useLoaderStore();
     const logout = () => {
       userStore.logout();
-      window.location.href = '/auth';
+      window.location.href = '/';
     };
     return {
       userStore,
