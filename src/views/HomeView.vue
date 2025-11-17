@@ -4,16 +4,17 @@
   <div>
     <h2>Accueil</h2>
     <!-- Événements en cours -->
+
     <section>
       <h3>Événements en cours</h3>
       <ul>
-        <li v-for="event in events" :key="event._id">
+        <li v-for="event in upcomingEvents" :key="event._id">
           <b>{{ event.title }}</b> le {{ formatDateTime(event.date) }}
           <span v-if="isParticipant(event)" style="color:green">(Inscrit)</span>
           <button v-else @click="participate(event)">Participer</button>
         </li>
       </ul>
-      <p v-if="events.length === 0">Aucun événement en cours.</p>
+      <p v-if="upcomingEvents.length === 0">Aucun événement en cours.</p>
     </section>
 
     <!-- Alertes -->
@@ -62,8 +63,14 @@ import { useFormatDate } from '../composables/useFormatDate';
 const userStore = useUserStore();
 const { formatDateTime } = useFormatDate();
 
+
 // Événements
 const events = ref([]);
+const now = () => new Date();
+const upcomingEvents = computed(() =>
+  events.value.filter(e => e.title && new Date(e.date) > now())
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+);
 async function fetchEvents() {
   events.value = await getEvents(userStore.token) || [];
 }
@@ -75,13 +82,32 @@ async function participate(event) {
   fetchEvents();
 }
 
-// Alertes (exemple : à remplacer par une vraie API si dispo)
-const alerts = ref([
-  { id: 1, message: 'Stock café très bas !', critical: true },
-  { id: 2, message: 'Machine 2 en maintenance', critical: false },
-  { id: 3, message: 'Evénement "Tournoi" dans 1h', critical: false }
+// Alertes dynamiques
+const staticAlerts = ref([
+  { id: 1, message: 'Stock café très bas !', critical: true }
 ]);
-const sortedAlerts = computed(() => [...alerts.value].sort((a, b) => b.critical - a.critical));
+const machineAlerts = computed(() =>
+  machines.value
+    .filter(m => m.state && m.state.toLowerCase() !== 'disponible')
+    .map(m => ({ id: 'm-' + m._id, message: `Machine ${m.name} en ${m.state}`, critical: false }))
+);
+const eventAlerts = computed(() => {
+  // Ex : événement imminent (dans l'heure)
+  const alerts = [];
+  const nowDate = now();
+  upcomingEvents.value.forEach(e => {
+    const diff = (new Date(e.date) - nowDate) / (1000 * 60); // minutes
+    if (diff > 0 && diff <= 60) {
+      alerts.push({ id: 'e-' + e._id, message: `Evénement "${e.title}" dans ${Math.round(diff)} min`, critical: false });
+    }
+  });
+  return alerts;
+});
+const sortedAlerts = computed(() => [
+  ...staticAlerts.value,
+  ...machineAlerts.value,
+  ...eventAlerts.value
+].sort((a, b) => b.critical - a.critical));
 
 // Machines
 const machines = ref([]);
