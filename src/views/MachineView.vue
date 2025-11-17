@@ -101,12 +101,16 @@ const lastCups = ref(null);
 const apiMessage = ref('');
 
 // Appel API SOLID
-const { data: machines, loading, error, fetchData } = useApiFetch(getMachines, [userStore.token]);
-// Force toujours machines à être un tableau pour éviter les erreurs .filter
-import { watch } from 'vue';
-watch(machines, (val) => {
-  if (!Array.isArray(val)) machines.value = [];
-});
+import { watch, computed } from 'vue';
+const machines = ref([]);
+const error = ref('');
+if (userStore.token) {
+  getMachines(userStore.token)
+    .then(data => { machines.value = Array.isArray(data) ? data : []; })
+    .catch(e => { error.value = e?.message || 'Erreur lors du chargement des machines.'; });
+} else {
+  error.value = 'Veuillez vous connecter pour voir les machines.';
+}
 const { page, pageSize, pageCount, paginatedItems, setPage } = usePagination(machines, 5);
 const { formatDate } = useFormatDate();
 

@@ -116,8 +116,10 @@ async function quickStart(machine) {
 }
 
 onMounted(() => {
-  fetchEvents();
-  fetchMachines();
+  if (userStore.token) {
+    fetchEvents();
+    fetchMachines();
+  }
 });
 </script>
 
