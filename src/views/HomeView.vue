@@ -50,7 +50,8 @@ const upcomingEvents = computed(() =>
     .sort((a, b) => new Date(a.date) - new Date(b.date))
 );
 async function fetchEvents() {
-  events.value = await getEvents(userStore.token) || [];
+  const res = await getEvents(userStore.token);
+  events.value = Array.isArray(res) ? res : [];
 }
 function isParticipant(event) {
   return userStore.user && event.participants && event.participants.includes(userStore.user._id);
@@ -97,7 +98,8 @@ const totalPages = computed(() => Math.ceil(machines.value.length / pageSize));
 const paginatedMachines = computed(() => machines.value.slice((page.value-1)*pageSize, page.value*pageSize));
 
 async function fetchMachines() {
-  machines.value = await getMachines(userStore.token) || [];
+  const res = await getMachines(userStore.token);
+  machines.value = Array.isArray(res) ? res : [];
   machines.value.forEach(m => {
     if (!(m._id in machineTickets.value)) machineTickets.value[m._id] = 1;
   });
