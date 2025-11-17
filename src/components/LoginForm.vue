@@ -13,6 +13,7 @@
 
 <script>
 import { apiFetch } from '../utils/api';
+import { useUserStore } from '../store/userStore';
 
 export default {
   name: 'LoginForm',
@@ -35,6 +36,7 @@ export default {
         this.error = 'Mot de passe requis.'
         return
       }
+      const userStore = useUserStore();
       try {
         const user = await apiFetch('auth/login', {
           method: 'POST',
@@ -44,7 +46,9 @@ export default {
             password: this.password
           }
         })
-        this.$emit('login', user)
+        userStore.setToken(user.token);
+        userStore.setUser(user);
+        this.$emit('login');
       } catch (e) {
         this.error = e.message || "Erreur réseau ou serveur."
       }

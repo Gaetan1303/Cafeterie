@@ -21,10 +21,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getProfile, updateProfile } from '../utils/api';
-import { useStore } from '../store';
-
-const store = useStore();
+import { useUserStore } from '../store/userStore';
+const userStore = useUserStore();
 const profile = ref(null);
 const editMode = ref(false);
 const form = ref({ firstName: '', lastName: '', email: '' });
@@ -33,7 +31,7 @@ const success = ref(false);
 
 onMounted(async () => {
   try {
-    const data = await getProfile(store.token);
+    const data = await getProfile(userStore.token);
     profile.value = data;
     form.value = { ...data };
   } catch (e) {
@@ -45,7 +43,7 @@ async function saveProfile() {
   error.value = '';
   success.value = false;
   try {
-    await updateProfile(form.value, store.token);
+    await updateProfile(form.value, userStore.token);
     profile.value = { ...form.value };
     success.value = true;
     editMode.value = false;

@@ -15,6 +15,7 @@
 
 <script>
 import { apiFetch } from '../utils/api';
+import { useUserStore } from '../store/userStore';
 
 export default {
   name: 'RegisterForm',
@@ -38,8 +39,9 @@ export default {
         this.error = 'Le mot de passe doit faire au moins 8 caractères.'
         return
       }
+      const userStore = useUserStore();
       try {
-        await apiFetch('auth/register', {
+        const user = await apiFetch('auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: {
@@ -48,8 +50,13 @@ export default {
             email: this.email,
             password: this.password
           }
-        })
-        this.$emit('register')
+        });
+        // Si le back renvoie un token, on le stocke
+        if (user && user.token) {
+          userStore.setToken(user.token);
+          userStore.setUser(user);
+        }
+        this.$emit('register');
       } catch (e) {
         // Affiche le message d’erreur du back si disponible
         if (e && e.message && e.message.startsWith('{')) {

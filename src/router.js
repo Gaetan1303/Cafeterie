@@ -5,6 +5,29 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
   {
+    path: '/api-routes',
+    name: 'ApiRoutes',
+    component: () => import('./views/ApiRoutesView.vue'),
+  },
+  {
+    path: '/achat',
+    name: 'Achat',
+    component: () => import('./views/PurchaseView.vue'),
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/historique',
+    name: 'Historique',
+    component: () => import('./views/HistoryView.vue'),
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/profil',
+    name: 'Profil',
+    component: () => import('./views/ProfileView.vue'),
+    // meta: { requiresAuth: true }
+  },
+  {
     path: '/',
     name: 'Home',
     component: () => import('./views/HomeView.vue'),

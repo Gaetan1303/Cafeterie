@@ -1,3 +1,7 @@
+// Utiliser une machine (préparer X tasses)
+export async function useMachine(id, data, token) {
+  return apiFetch(`/machines/${id}/use`, { method: 'POST', body: data, token });
+}
 // Utilitaire pour centraliser l'URL de l'API back-end
 
 

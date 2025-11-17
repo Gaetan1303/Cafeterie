@@ -14,40 +14,29 @@
 </template>
 
 <script>
+import { useUserStore } from './store/userStore';
+
 export default {
   name: 'App',
-  data() {
+  setup() {
+    const userStore = useUserStore();
+    const logout = () => {
+      userStore.logout();
+      // Optionnel : router vers /auth
+      window.location.href = '/auth';
+    };
     return {
-      user: this.getUser()
-    }
+      userStore,
+      logout
+    };
   },
   computed: {
     isLoggedIn() {
-      return !!this.user && !!this.user.email
+      return this.userStore.isAuthenticated;
     },
     isAdmin() {
-      return this.user && this.user.role === 'admin'
+      return this.userStore.isAdmin;
     }
-  },
-  methods: {
-    getUser() {
-      try {
-        return JSON.parse(localStorage.getItem('user') || '{}')
-      } catch {
-        return {}
-      }
-    },
-    logout() {
-      localStorage.removeItem('user')
-      localStorage.removeItem('token')
-      this.user = {}
-      this.$router.push('/auth')
-    }
-  },
-  mounted() {
-    window.addEventListener('storage', () => {
-      this.user = this.getUser()
-    })
   }
 }
 </script>
