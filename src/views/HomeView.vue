@@ -28,28 +28,6 @@
       <p v-if="sortedAlerts.length === 0">Aucune alerte.</p>
     </section>
 
-    <!-- Allumer les machines -->
-    <section style="margin-top:2em">
-      <h3>Allumer une machine</h3>
-      <div v-if="machines.length">
-        <div v-for="machine in paginatedMachines" :key="machine._id" class="machine-card">
-          <b>{{ machine.name }}</b> ({{ machine.type }}) - {{ machine.state }}<br />
-          Capacité : {{ machine.capacity }} {{ machine.unit }}<br />
-          <label>Tickets :
-            <input type="number" v-model.number="machineTickets[machine._id]" :min="1" :max="machine.capacity" style="width:4em" />
-          </label>
-          <button @click="startMachine(machine)">Démarrer</button>
-          <button @click="quickStart(machine)">Mode rapide (max)</button>
-          <span v-if="machineMessages[machine._id]" style="margin-left:1em;color:green">{{ machineMessages[machine._id] }}</span>
-        </div>
-        <div style="margin:1em 0;">
-          <button @click="prevPage" :disabled="page === 1">&lt; Précédent</button>
-          Page {{ page }} / {{ totalPages }}
-          <button @click="nextPage" :disabled="page === totalPages">Suivant &gt;</button>
-        </div>
-      </div>
-      <p v-else>Aucune machine disponible.</p>
-    </section>
   </div>
 </template>
 
