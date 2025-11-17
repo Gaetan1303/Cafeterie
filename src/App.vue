@@ -51,6 +51,30 @@ export default {
 </script>
 
 <style>
+nav {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  font-size: 1.15rem;
+}
+nav a, nav .router-link-active {
+  color: #4B0082;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+nav a.router-link-exact-active, nav .router-link-exact-active {
+  background: #e6e6fa;
+  color: #2d8cf0;
+  text-decoration: underline;
+}
+nav a:hover {
+  background: #f3f3ff;
+  color: #2d8cf0;
+}
 .global-loader {
   position: fixed;
   z-index: 9998;
