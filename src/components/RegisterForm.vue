@@ -13,9 +13,11 @@
   </div>
 </template>
 
+
 <script>
 import { apiFetch } from '../utils/api';
 import { useUserStore } from '../store/userStore';
+import { formSchemas, validateForm } from '../utils/formSchema';
 
 export default {
   name: 'RegisterForm',
@@ -25,19 +27,21 @@ export default {
       lastName: '',
       email: '',
       password: '',
-      error: ''
-    }
+      error: '' // Local error handling supprimé
+    };
   },
   methods: {
     async register() {
-      this.error = ''
-      if (!this.firstName || !this.lastName) {
-        this.error = 'Nom et prénom requis.'
-        return
-      }
-      if (this.password.length < 8) {
-        this.error = 'Le mot de passe doit faire au moins 8 caractères.'
-        return
+      this.error = '';
+      const err = validateForm(formSchemas.register, {
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        password: this.password
+      });
+      if (err) {
+        this.error = err;
+        return;
       }
       const userStore = useUserStore();
       try {
@@ -51,24 +55,13 @@ export default {
             password: this.password
           }
         });
-        // Si le back renvoie un token, on le stocke
         if (user && user.token) {
           userStore.setToken(user.token);
           userStore.setUser(user);
         }
         this.$emit('register');
       } catch (e) {
-        // Affiche le message d’erreur du back si disponible
-        if (e && e.message && e.message.startsWith('{')) {
-          try {
-            const errObj = JSON.parse(e.message)
-            this.error = errObj.error || 'Erreur serveur.'
-          } catch {
-            this.error = e.message
-          }
-        } else {
-          this.error = e.message || 'Erreur réseau ou serveur.'
-        }
+        // L'erreur est gérée globalement par errorStore/api.js
       }
     }
   }

@@ -25,9 +25,9 @@ export default {
       this.$router.push('/dashboard');
     },
     onRegister() {
-      alert('Inscription réussie ! Connectez-vous.');
+      // Message de succès : à remplacer par notification plus tard
       this.mode = 'login';
-    }
+    },
   }
 }
 </script>

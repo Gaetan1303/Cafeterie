@@ -26,6 +26,15 @@
 </template>
 
 <script>
+
+
+import { useStockMap } from '../composables/useStockMap';
+import { useUserStore } from '../store/userStore';
+import { createPurchase } from '../utils/api';
+import { useToastStore } from '../store/toastStore';
+import { sanitizeInput } from '../utils/sanitize';
+import { formSchemas, validateForm } from '../utils/formSchema';
+
 export default {
   name: 'PurchaseForm',
   data() {
@@ -37,52 +46,56 @@ export default {
       success: false
     }
   },
+  setup() {
+    const { stockMap, loading, fetchData } = useStockMap();
+    const userStore = useUserStore();
+  const toastStore = useToastStore();
+  return { stockMap, loading, fetchData, userStore, toastStore };
+  },
   methods: {
     onTypeChange() {
       if (this.type !== 'nourriture') this.subtype = ''
     },
     async submitPurchase() {
-      this.error = ''
-      this.success = false
-      const allowedTypes = ['cafe', 'the', 'nourriture']
-      const allowedSubtypes = ['gateau', 'viennoiserie', 'autre']
-      if (!allowedTypes.includes(this.type)) {
-        this.error = 'Type invalide.'
-        return
+      this.error = '';
+      this.success = false;
+      const err = validateForm(formSchemas.purchase, {
+        type: this.type,
+        subtype: this.type === 'nourriture' ? this.subtype : '',
+        quantity: this.quantity
+      });
+      if (err) {
+        this.error = err;
+        this.toastStore.showToast(this.error, 'error');
+        return;
       }
-      if (this.type === 'nourriture' && !allowedSubtypes.includes(this.subtype)) {
-        this.error = 'Sous-type invalide.'
-        return
+      // Vérification du stock disponible avant appel API
+      const key = this.type + '|' + (this.type === 'nourriture' ? this.subtype : '');
+      const item = this.stockMap[key];
+      if (!item) {
+        this.error = "Produit non trouvé dans le stock.";
+        this.toastStore.showToast(this.error, 'error');
+        return;
       }
-      if (this.quantity < 1 || this.quantity > 5) {
-        this.error = 'Quantité invalide (1 à 5).'
-        return
+      if (item.quantity < this.quantity) {
+        this.error = `Stock insuffisant : il reste ${item.quantity} unité(s).`;
+        this.toastStore.showToast(this.error, 'error');
+        return;
       }
       try {
-        const token = localStorage.getItem('token')
-        const response = await fetch('/purchases', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
-          },
-          body: JSON.stringify({
-            type: this.type,
-            subtype: this.type === 'nourriture' ? this.subtype : null,
-            quantity: this.quantity
-          })
-        })
-        if (!response.ok) {
-          const data = await response.json()
-          this.error = data.message || 'Erreur lors de l\'achat'
-          return
-        }
-        this.success = true
-        this.type = 'cafe'
-        this.subtype = 'gateau'
-        this.quantity = 1
+        // Sanitize les champs texte (type, subtype)
+        const safeType = sanitizeInput(this.type);
+        const safeSubtype = this.type === 'nourriture' ? sanitizeInput(this.subtype) : null;
+        await createPurchase({ stockItem: item._id, quantity: this.quantity, type: safeType, subtype: safeSubtype }, this.userStore.token);
+        this.success = true;
+        this.toastStore.showToast('Achat enregistré !', 'success');
+        this.type = 'cafe';
+        this.subtype = 'gateau';
+        this.quantity = 1;
+        this.fetchData(); // Rafraîchir le stock
       } catch (e) {
-        this.error = "Erreur réseau ou serveur."
+        this.error = e?.message || 'Erreur lors de l\'achat';
+        this.toastStore.showToast(this.error, 'error');
       }
     }
   }

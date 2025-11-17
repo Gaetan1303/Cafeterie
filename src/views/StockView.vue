@@ -2,8 +2,10 @@
   <div>
     <h1>Stock</h1>
     <ul>
-      <li v-for="item in pagedStock" :key="item._id">
-        <b>{{ item.type }}</b> ({{ item.category }}) : {{ item.quantity }}
+      <li v-for="item in paginatedItems" :key="item._id">
+        <span :style="stockColorStyle(item)">
+          <b>{{ item.type }}</b> ({{ item.category }}) : {{ item.quantity }}
+        </span>
         <button @click="selectItem(item)">Détail</button>
       </li>
     </ul>
@@ -19,50 +21,100 @@
       <p>Quantité : {{ selected.quantity }}</p>
       <p>Seuil : {{ selected.threshold }}</p>
       <button @click="selected = null">Fermer</button>
+      <div v-if="userStore.user?.role === 'admin'">
+        <h3>Réapprovisionnement</h3>
+        <form @submit.prevent="handleRestock">
+          <input type="number" v-model.number="restockQty" min="1" placeholder="Quantité à ajouter" required />
+          <button type="submit" :disabled="restockLoading">Réapprovisionner</button>
+        </form>
+        <span v-if="restockLoading">Réapprovisionnement...</span>
+        <span v-if="restockSuccess" style="color:green">Stock mis à jour !</span>
+        <span v-if="restockError" style="color:red">{{ restockError }}</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useUserStore } from '../store/userStore';
-import { getStock, getStockItem } from '../utils/api';
+
+
+
+import { useToastStore } from '../store/toastStore';
+import { validateQuantity } from '../utils/validation';
 
 const userStore = useUserStore();
-const stock = ref([]);
+const toastStore = useToastStore();
 const selected = ref(null);
-const error = ref('');
-const page = ref(1);
-const pageSize = 5;
-const totalPages = computed(() => Math.ceil(stock.value.length / pageSize));
-const pagedStock = computed(() => {
-  const start = (page.value - 1) * pageSize;
-  return stock.value.slice(start, start + pageSize);
-});
+const { data: stockRaw, loading, error, fetchData } = useApiFetch(getStock, [userStore.token]);
+const stock = computed(() => Array.isArray(stockRaw.value) ? stockRaw.value : (stockRaw.value?.data || []));
+const { page, pageSize, pageCount, paginatedItems, setPage } = usePagination(stock, 5);
 
-onMounted(fetchStock);
-
-async function fetchStock() {
-  error.value = '';
-  try {
-    stock.value = await getStock(userStore.token);
-  } catch (e) {
-    error.value = 'Erreur réseau ou serveur.';
+function stockColorStyle(item) {
+  if (typeof item.quantity !== 'number' || typeof item.threshold !== 'number') return {};
+  if (item.quantity > item.threshold * 2) {
+    return { color: 'green', fontWeight: 'bold' };
+  } else if (item.quantity > item.threshold) {
+    return { color: 'orange', fontWeight: 'bold' };
+  } else {
+    return { color: 'red', fontWeight: 'bold' };
   }
 }
 
+const restockQty = ref(1);
+const restockLoading = ref(false);
+const restockSuccess = ref(false);
+const restockError = ref('');
+
 function nextPage() {
-  if (page.value < totalPages.value) page.value++;
+  setPage(page.value + 1);
 }
 function prevPage() {
-  if (page.value > 1) page.value--;
+  setPage(page.value - 1);
 }
 
 async function selectItem(item) {
+  restockSuccess.value = false;
+  restockError.value = '';
+  restockQty.value = 1;
   selected.value = await getStockItem(item._id, userStore.token);
 }
-</script>
 
-<style scoped>
-/* Ajoutez ici vos styles personnalisés */
-</style>
+async function handleRestock() {
+  if (!selected.value) return;
+  if (!validateQuantity(restockQty.value)) {
+    restockError.value = 'Quantité invalide (1-100)';
+    toastStore.showToast(restockError.value, 'error');
+    return;
+  }
+  restockLoading.value = true;
+  restockSuccess.value = false;
+  restockError.value = '';
+  try {
+    await restockStockItem(selected.value._id, restockQty.value, userStore.token);
+    restockSuccess.value = true;
+    toastStore.showToast('Stock réapprovisionné !', 'success');
+    await fetchData();
+    // Rafraîchir l'item sélectionné
+    selected.value = await getStockItem(selected.value._id, userStore.token);
+  } catch (e) {
+    restockError.value = e?.message || 'Erreur lors du réapprovisionnement';
+    toastStore.showToast(restockError.value, 'error');
+  } finally {
+    restockLoading.value = false;
+  }
+}
+</script>
+    <ul>
+      <li v-for="item in paginatedItems" :key="item._id">
+        <b>{{ item.type }}</b> ({{ item.category }}) : {{ item.quantity }}
+        <button @click="selectItem(item)">Détail</button>
+      </li>
+    </ul>
+    <div style="margin: 1em 0;">
+      <button @click="prevPage" :disabled="page === 1">&lt; Précédent</button>
+      Page {{ page }} / {{ pageCount }}
+      <button @click="nextPage" :disabled="page === pageCount">Suivant &gt;</button>
+      <span v-if="error" style="color:red">{{ error.message || error }}</span>
+      <span v-if="loading">Chargement...</span>
+    </div>
+}

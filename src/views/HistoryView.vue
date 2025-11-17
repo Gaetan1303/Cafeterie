@@ -33,95 +33,113 @@
     </table>
     <p v-if="error" class="error">{{ error }}</p>
     <div v-if="isAdmin" class="admin-history">
-      <h3>Vue globale (admin)</h3>
-      <button @click="fetchAllHistory">Voir tout l'historique</button>
-      <table v-if="allHistory.length">
-        <thead>
-          <tr>
-            <th>Utilisateur</th>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Sous-type</th>
-            <th>Quantité</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in allHistory" :key="item.id">
-            <td>{{ item.userEmail }}</td>
-            <td>{{ formatDate(item.timestamp) }}</td>
-            <td>{{ item.type }}</td>
-            <td>{{ item.subtype || '-' }}</td>
-            <td>{{ item.quantity }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <h3>Historique global des mouvements de stock (admin)</h3>
+        <button @click="fetchStockHistory">Charger l'historique global</button>
+        <table v-if="stockHistory.length">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Action</th>
+              <th>Type</th>
+              <th>Sous-type</th>
+              <th>Catégorie</th>
+              <th>Quantité</th>
+              <th>Utilisateur</th>
+              <th>Auteur</th>
+              <th>Raison</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="h in stockHistory" :key="h._id">
+              <td>{{ formatDate(h.date) }}</td>
+              <td>{{ h.action }}</td>
+              <td>{{ h.item?.type || '-' }}</td>
+              <td>{{ h.item?.subtype || '-' }}</td>
+              <td>{{ h.item?.category || '-' }}</td>
+              <td>{{ h.quantity }}</td>
+              <td>{{ h.user ? h.user.email : '-' }}</td>
+              <td>{{ h.auteur ? h.auteur.email : '-' }}</td>
+              <td>{{ h.reason || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1em">
+          <label>ID d'un item :</label>
+          <input v-model="itemId" placeholder="ID de l'item" />
+          <button @click="fetchItemHistory">Voir historique de l'item</button>
+        </div>
+        <table v-if="itemHistory.length">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Action</th>
+              <th>Quantité</th>
+              <th>Utilisateur</th>
+              <th>Auteur</th>
+              <th>Raison</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="h in itemHistory" :key="h._id">
+              <td>{{ formatDate(h.date) }}</td>
+              <td>{{ h.action }}</td>
+              <td>{{ h.quantity }}</td>
+              <td>{{ h.user ? h.user.email : '-' }}</td>
+              <td>{{ h.auteur ? h.auteur.email : '-' }}</td>
+              <td>{{ h.reason || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'HistoryView',
-  data() {
-    return {
-      history: [],
-      allHistory: [],
-      filterType: '',
-      filterDate: '',
-      error: ''
-    }
-  },
-  computed: {
-    isAdmin() {
-      const user = JSON.parse(localStorage.getItem('user') || '{}')
-      return user.role === 'admin'
-    }
-  },
-  methods: {
-    async fetchHistory() {
-      this.error = ''
-      try {
-        const token = localStorage.getItem('token')
-  let url = '/purchases/me?'
-        if (this.filterType) url += `type=${this.filterType}&`
-        if (this.filterDate) url += `date=${this.filterDate}`
-        const response = await fetch(url, {
-          headers: { 'Authorization': token ? `Bearer ${token}` : '' }
-        })
-        if (!response.ok) {
-          this.error = 'Erreur lors de la récupération de l\'historique.'
-          return
-        }
-        this.history = await response.json()
-      } catch (e) {
-        this.error = 'Erreur réseau ou serveur.'
-      }
-    },
-    async fetchAllHistory() {
-      this.error = ''
-      try {
-        const token = localStorage.getItem('token')
-  const response = await fetch('/purchases', {
-          headers: { 'Authorization': token ? `Bearer ${token}` : '' }
-        })
-        if (!response.ok) {
-          this.error = 'Erreur lors de la récupération de l\'historique global.'
-          return
-        }
-        this.allHistory = await response.json()
-      } catch (e) {
-        this.error = 'Erreur réseau ou serveur.'
-      }
-    },
-    formatDate(date) {
-      if (!date) return '-'
-      return new Date(date).toLocaleString()
-    }
-  },
-  mounted() {
-    this.fetchHistory()
+<script setup>
+
+import { useToastStore } from '../store/toastStore';
+
+const userStore = useUserStore();
+const toastStore = useToastStore();
+const filterType = ref('');
+const filterDate = ref('');
+const { formatDate } = useFormatDate();
+const isAdmin = computed(() => userStore.user?.role === 'admin');
+
+// Historique utilisateur
+const { data: historyRaw, loading, error, fetchData } = useApiFetch(fetchHistoryApi, [filterType, filterDate, userStore.token], { autoFetch: false });
+const history = computed(() => Array.isArray(historyRaw.value) ? historyRaw.value : (historyRaw.value?.data || []));
+const { page, pageSize, pageCount, paginatedItems, setPage } = usePagination(history, 10);
+
+// Historique global admin
+const { data: allHistoryRaw, loading: loadingAll, error: errorAll, fetchData: fetchAllHistory } = useApiFetch(fetchAllHistoryApi, [userStore.token], { autoFetch: false });
+const allHistory = computed(() => Array.isArray(allHistoryRaw.value) ? allHistoryRaw.value : (allHistoryRaw.value?.data || []));
+
+async function fetchHistoryApi(type, date, token) {
+  let url = '/purchases/me?';
+  if (type) url += `type=${type}&`;
+  if (date) url += `date=${date}`;
+  try {
+    const res = await apiFetch(url, { token });
+    toastStore.showToast('Historique chargé', 'success');
+    return res;
+  } catch (e) {
+    toastStore.showToast(e?.message || 'Erreur lors du chargement de l\'historique', 'error');
+    throw e;
   }
 }
+
+async function fetchAllHistoryApi(token) {
+  try {
+    const res = await apiFetch('/purchases', { token });
+    toastStore.showToast('Historique global chargé', 'success');
+    return res;
+  } catch (e) {
+    toastStore.showToast(e?.message || 'Erreur lors du chargement global', 'error');
+    throw e;
+  }
+}
+
+fetchData();
 </script>
 
 <style scoped>

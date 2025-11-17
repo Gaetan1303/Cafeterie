@@ -11,9 +11,11 @@
   </div>
 </template>
 
+
 <script>
 import { apiFetch } from '../utils/api';
 import { useUserStore } from '../store/userStore';
+import { formSchemas, validateForm } from '../utils/formSchema';
 
 export default {
   name: 'LoginForm',
@@ -21,20 +23,19 @@ export default {
     return {
       email: '',
       password: '',
-      error: ''
+       error: '' // Local error handling removed
     }
   },
   methods: {
     async login() {
-      this.error = ''
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(this.email)) {
-        this.error = 'Email invalide.'
-        return
-      }
-      if (!this.password || this.password.length < 4) {
-        this.error = 'Mot de passe requis.'
-        return
+      this.error = '';
+      const err = validateForm(formSchemas.login, {
+        email: this.email,
+        password: this.password
+      });
+      if (err) {
+        this.error = err;
+        return;
       }
       const userStore = useUserStore();
       try {
@@ -50,7 +51,7 @@ export default {
         userStore.setUser(user);
         this.$emit('login');
       } catch (e) {
-        this.error = e.message || "Erreur réseau ou serveur."
+         // L'erreur est gérée globalement par errorStore/api.js
       }
     }
   }

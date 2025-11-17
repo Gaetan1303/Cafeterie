@@ -48,19 +48,16 @@
 </template>
 <script setup>
 import { useRouter } from 'vue-router';
-const router = useRouter();
-
-function goToStock(stockId) {
-  router.push({ path: '/stock', query: { id: stockId } });
-}
-import { ref, computed, onMounted } from 'vue';
+import { ref } from 'vue';
 import { getMachines, getMachine, useMachine } from '../utils/api';
 import { useUserStore } from '../store/userStore';
 import { fillMachine } from '../services/machineService';
+import { useApiFetch } from '../composables/useApiFetch';
+import { usePagination } from '../composables/usePagination';
+import { useFormatDate } from '../composables/useFormatDate';
 
+const router = useRouter();
 const userStore = useUserStore();
-const machines = ref([]);
-const error = ref('');
 const selected = ref(null);
 const fillLevel = ref(0);
 const amountToFill = ref(0);
@@ -68,43 +65,32 @@ const lastTickets = ref(null);
 const lastCups = ref(null);
 const apiMessage = ref('');
 
-// Pagination
-const page = ref(1);
-const pageSize = 5;
-const totalPages = computed(() => Math.ceil(machines.value.length / pageSize));
-const pagedMachines = computed(() => {
-  const start = (page.value - 1) * pageSize;
-  return machines.value.slice(start, start + pageSize);
-});
+// Appel API SOLID
+const { data: machines, loading, error, fetchData } = useApiFetch(getMachines, [userStore.token]);
+const { page, pageSize, pageCount, paginatedItems, setPage } = usePagination(machines, 5);
+const { formatDate } = useFormatDate();
 
-function nextPage() {
-  if (page.value < totalPages.value) page.value++;
+function goToStock(stockId) {
+  router.push({ path: '/stock', query: { id: stockId } });
 }
-function prevPage() {
-  if (page.value > 1) page.value--;
-}
-
-onMounted(fetchMachines);
-
-async function fetchMachines() {
-  error.value = '';
-  try {
-    machines.value = await getMachines(userStore.token);
-  } catch (e) {
-    error.value = 'Erreur réseau ou serveur.';
-  }
-
 
 async function selectMachine(m) {
   selected.value = await getMachine(m._id, userStore.token);
   fillLevel.value = 0;
   amountToFill.value = 0;
   lastTickets.value = null;
+  lastCups.value = null;
 }
 
 async function remplirEtUtiliserMachine() {
   if (!selected.value) return;
   apiMessage.value = '';
+  // Si la quantité est invalide, on ne fait rien et on réinitialise les compteurs
+  if (!amountToFill.value || amountToFill.value < 1) {
+    lastCups.value = null;
+    lastTickets.value = null;
+    return;
+  }
   // Simulation locale (optionnel)
   const machine = {
     ...selected.value,
@@ -115,7 +101,6 @@ async function remplirEtUtiliserMachine() {
   fillLevel.value = newFillLevel;
   lastTickets.value = tickets;
   lastCups.value = filled;
-  // Appel API pour générer les tickets/tasses côté back
   try {
     const res = await useMachine(selected.value._id, { quantity: filled, AuteurId: userStore.user?.id }, userStore.token);
     apiMessage.value = res.message || 'Préparation effectuée.';
@@ -123,5 +108,12 @@ async function remplirEtUtiliserMachine() {
     apiMessage.value = e.message || 'Erreur lors de l\'utilisation de la machine.';
   }
   amountToFill.value = 0;
+}
+
+function nextPage() {
+  setPage(page.value + 1);
+}
+function prevPage() {
+  setPage(page.value - 1);
 }
 </script>

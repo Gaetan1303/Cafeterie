@@ -20,9 +20,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useUserStore } from '../store/userStore';
+import { sanitizeInput } from '../utils/sanitize';
+import { formSchemas, validateForm } from '../utils/formSchema';
 const userStore = useUserStore();
+const toastStore = useToastStore();
 const profile = ref(null);
 const editMode = ref(false);
 const form = ref({ firstName: '', lastName: '', email: '' });
@@ -42,13 +43,32 @@ onMounted(async () => {
 async function saveProfile() {
   error.value = '';
   success.value = false;
+  const err = validateForm(formSchemas.register, {
+    firstName: form.value.firstName,
+    lastName: form.value.lastName,
+    email: form.value.email,
+    password: 'dummyPassword' // non utilisé ici
+  });
+  if (err) {
+    error.value = err;
+    toastStore.showToast(error.value, 'error');
+    return;
+  }
   try {
-    await updateProfile(form.value, userStore.token);
-    profile.value = { ...form.value };
+    // Sanitize les champs texte
+    const safeForm = {
+      firstName: sanitizeInput(form.value.firstName),
+      lastName: sanitizeInput(form.value.lastName),
+      email: form.value.email // email non modifiable
+    };
+    await updateProfile(safeForm, userStore.token);
+    profile.value = { ...safeForm };
     success.value = true;
+    toastStore.showToast('Profil mis à jour !', 'success');
     editMode.value = false;
   } catch (e) {
     error.value = 'Erreur lors de la mise à jour.';
+    toastStore.showToast(error.value, 'error');
   }
 }
 </script>
