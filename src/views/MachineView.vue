@@ -2,9 +2,10 @@
   <div>
     <h1>Machines</h1>
     <ul>
-      <li v-for="m in pagedMachines" :key="m._id">
-        <b>{{ m.name }}</b> ({{ m.type }}) - {{ m.state }}
-        <button @click="selectMachine(m)">Détail</button>
+      <li v-for="m in paginatedMachines" :key="m._id" class="machine-card">
+        <b>{{ m.name }}</b> ({{ m.type }}) - <span :style="m.state !== 'disponible' ? 'color:red' : ''">{{ m.state }}</span><br />
+        <span class="desc">Capacité : {{ m.capacity }} {{ m.unit }} — Peut préparer jusqu'à {{ m.capacity }} tasses par cycle.</span><br />
+        <button @click="selectMachine(m)">Lancer</button>
       </li>
     </ul>
     <div style="margin: 1em 0;">
@@ -13,11 +14,11 @@
       <button @click="nextPage" :disabled="page === totalPages">Suivant &gt;</button>
         <span v-if="error" style="color:red">{{ error }}</span>
     </div>
-    <div v-if="selected">
+    <div v-if="selected" class="machine-modal">
       <h2>{{ selected.name }}</h2>
       <p>Type : {{ selected.type }}</p>
-      <p>État : {{ selected.state }}</p>
-      <p>Capacité : {{ selected.capacity }} {{ selected.unit }}</p>
+      <p>État : <span :style="selected.state !== 'disponible' ? 'color:red' : ''">{{ selected.state }}</span></p>
+      <p>Capacité : {{ selected.capacity }} {{ selected.unit }} — Peut préparer jusqu'à {{ selected.capacity }} tasses par cycle.</p>
       <div v-if="selected.consumables && selected.consumables.length" style="margin:1em 0;">
         <h3>Consommables associés :</h3>
         <ul>
@@ -32,18 +33,52 @@
           </li>
         </ul>
       </div>
-      <div style="margin:1em 0;">
-        <label>Remplir la machine&nbsp;:
-          <input type="number" v-model.number="amountToFill" min="1" :max="selected.capacity - fillLevel" style="width:5em;" /> {{ selected.unit }}
-        </label>
-        <button @click="remplirEtUtiliserMachine" :disabled="amountToFill < 1 || fillLevel >= selected.capacity">Remplir &amp; Utiliser</button>
+      <div class="mode-section">
+        <h3>Mode Rapide</h3>
+        <p>Remplit la machine avec le nombre maximum de tasses ({{ selected.capacity }}).</p>
+        <button @click="amountToFill = selected.capacity; remplirEtUtiliserMachine()">Lancer (max)</button>
+        <span v-if="apiMessage && amountToFill === selected.capacity" style="margin-left:1em;color:green">{{ apiMessage }}</span>
       </div>
-      <p>Niveau actuel : {{ fillLevel }} / {{ selected.capacity }} {{ selected.unit }}</p>
+      <div class="mode-section">
+        <h3>Mode Manuel</h3>
+        <label>Nombre de tasses à préparer :
+          <input type="number" v-model.number="amountToFill" min="1" :max="selected.capacity" style="width:5em;" />
+        </label>
+        <button @click="remplirEtUtiliserMachine" :disabled="amountToFill < 1">Lancer</button>
+        <span v-if="apiMessage && amountToFill !== selected.capacity" style="margin-left:1em;color:green">{{ apiMessage }}</span>
+      </div>
       <p v-if="lastCups !== null">Tasses préparées : <b>{{ lastCups }}</b></p>
       <p v-if="lastTickets !== null">Tickets générés : <b>{{ lastTickets }}</b></p>
-      <p v-if="apiMessage">{{ apiMessage }}</p>
       <button @click="selected = null">Fermer</button>
     </div>
+<style scoped>
+.machine-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1em;
+  margin-bottom: 1em;
+  background: #fafaff;
+  box-shadow: 0 2px 8px #0001;
+}
+.desc {
+  color: #555;
+  font-size: 0.95em;
+}
+.machine-modal {
+  border: 2px solid #2d8cf0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 2em;
+  margin-top: 2em;
+  max-width: 500px;
+}
+.mode-section {
+  margin: 1.5em 0;
+  padding: 1em;
+  background: #f6f8ff;
+  border-radius: 6px;
+}
+</style>
   </div>
 </template>
 <script setup>
