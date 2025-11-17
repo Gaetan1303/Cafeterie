@@ -98,7 +98,7 @@
 
 import { useToastStore } from '../store/toastStore';
 
-import { useUserStore } from '../store';
+import { useUserStore } from '../store/userStore';
 const userStore = useUserStore();
 const toastStore = useToastStore();
 const filterType = ref('');
