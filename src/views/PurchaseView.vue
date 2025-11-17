@@ -41,6 +41,12 @@ import { useRouter } from 'vue-router';
 
 
 import { apiFetch } from '../utils/api';
+import { useUserStore } from '../store/userStore';
+import { useToastStore } from '../store/toastStore';
+import { ref, computed, watchEffect } from 'vue';
+import { getMyPurchases, createPurchase } from '../utils/api';
+import { usePagination } from '../composables/usePagination';
+import { useFormatDate } from '../composables/useFormatDate';
 async function deletePurchase(id) {
   if (!id) return;
   if (!confirm('Supprimer cet achat ?')) return;

@@ -102,6 +102,11 @@ const apiMessage = ref('');
 
 // Appel API SOLID
 const { data: machines, loading, error, fetchData } = useApiFetch(getMachines, [userStore.token]);
+// Force toujours machines à être un tableau pour éviter les erreurs .filter
+import { watch } from 'vue';
+watch(machines, (val) => {
+  if (!Array.isArray(val)) machines.value = [];
+});
 const { page, pageSize, pageCount, paginatedItems, setPage } = usePagination(machines, 5);
 const { formatDate } = useFormatDate();
 

@@ -19,10 +19,15 @@
   </div>
 </template>
 
+
 <script setup>
+import { ref, onMounted } from 'vue';
 import { sanitizeInput } from '../utils/sanitize';
 import { formSchemas, validateForm } from '../utils/formSchema';
 import { useUserStore } from '../store/userStore';
+import { useToastStore } from '../store/toastStore';
+import { getProfile, updateProfile } from '../utils/api';
+
 const userStore = useUserStore();
 const toastStore = useToastStore();
 const profile = ref(null);
