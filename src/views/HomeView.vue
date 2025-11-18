@@ -99,7 +99,14 @@ const paginatedMachines = computed(() => machines.value.slice((page.value-1)*pag
 
 async function fetchMachines() {
   const res = await getMachines(userStore.token);
-  machines.value = Array.isArray(res) ? res : [];
+  // Accepte un tableau direct ou un objet { machines: [...] }
+  if (Array.isArray(res)) {
+    machines.value = res;
+  } else if (res && Array.isArray(res.machines)) {
+    machines.value = res.machines;
+  } else {
+    machines.value = [];
+  }
   machines.value.forEach(m => {
     if (!(m._id in machineTickets.value)) machineTickets.value[m._id] = 1;
   });
