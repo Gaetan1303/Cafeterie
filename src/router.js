@@ -1,9 +1,9 @@
+// src/router.js
 import { createRouter, createWebHistory } from 'vue-router';
-import { useUserStore } from './store/userStore';
-// Import statique pour éviter les problèmes de chargement dynamique du chunk AuthView
-import AuthView from './views/AuthView.vue';
 
-// Guards centralisés
+//  NE PAS importer le store ici au niveau global !!
+// import { useUserStore } from './store/userStore'; 
+
 
 const routes = [
   {
@@ -85,39 +85,47 @@ const routes = [
 ];
 
 
+
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-
-
 router.beforeEach(async (to, from, next) => {
-  const userStore = useUserStore();
-  // Si le store n'est pas initialisé mais un token existe en localStorage, recharge l'utilisateur
+  //  Importer dynamiquement pour éviter les erreurs de contexte
+  const { useUserStore } = await import('./store/userStore');
+  
+  let userStore;
+  try {
+    userStore = useUserStore();
+  } catch (e) {
+    console.error('Erreur store dans router guard:', e);
+    return next();
+  }
+
+  // Recharger le profil si nécessaire
   if (!userStore.token && localStorage.getItem('user')) {
-    const data = JSON.parse(localStorage.getItem('user'));
-    if (data.token) userStore.setToken(data.token);
-    if (!userStore.user && data.token) {
-      try {
-        // On recharge le profil utilisateur depuis l'API
-        const { getProfile } = await import('./utils/api');
-        const user = await getProfile(data.token);
-        userStore.setUser(user);
-      } catch (e) {
-        userStore.logout();
-        return next('/auth');
+    try {
+      const data = JSON.parse(localStorage.getItem('user'));
+      if (data.token) {
+        userStore.setToken(data.token);
+        if (!userStore.user && data.user) {
+          userStore.setUser(data.user);
+        }
       }
+    } catch (e) {
+      console.error('Erreur reload user:', e);
     }
   }
-  // Auth required
-  if (to.meta && to.meta.requiresAuth && !userStore.isAuthenticated) {
+
+  // Guards d'authentification
+  if (to.meta?.requiresAuth && !userStore.isAuthenticated) {
     return next('/auth');
   }
-  // Admin required
-  if (to.meta && to.meta.requiresAdmin && !userStore.isAdmin) {
+  if (to.meta?.requiresAdmin && !userStore.isAdmin) {
     return next('/');
   }
+  
   next();
 });
 

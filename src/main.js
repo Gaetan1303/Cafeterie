@@ -1,34 +1,23 @@
+// src/main.js
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
-import { createPinia } from 'pinia';
 
+//  1. Créer Pinia
 const pinia = createPinia();
+
+//  2. Créer l'app
 const app = createApp(App);
+
+//  3. Enregistrer Pinia (AVANT tout)
 app.use(pinia);
+
+//  4. Enregistrer le router
 app.use(router);
+
+//  5. Monter l'app
 app.mount('#app');
 
-// Initialisation des stores APRES le mount
-import { useUserStore } from './store/userStore';
-import { useErrorStore } from './store/errorStore';
-
-try {
-	const userStore = useUserStore();
-	// Persistance manuelle si nécessaire
-	const saved = localStorage.getItem('user');
-	if (saved) {
-		const data = JSON.parse(saved);
-		if (data.token) userStore.setToken(data.token);
-		if (data.user) userStore.setUser(data.user);
-	}
-	userStore.$subscribe((mutation, state) => {
-		localStorage.setItem('user', JSON.stringify({
-			token: state.token,
-			user: state.user
-		}));
-	});
-	useErrorStore();
-} catch (e) {
-	console.error('Erreur initialisation stores:', e);
-}
+//  6. Initialiser les stores APRÈS le mount
+// Ne pas faire d'appel ici si App.vue gère déjà les stores
