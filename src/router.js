@@ -32,7 +32,7 @@ const routes = [
   {
     path: '/auth',
     name: 'Auth',
-    component: AuthView,
+    component: () => import('./views/AuthView.vue'),
   },
   {
     path: '/profile',

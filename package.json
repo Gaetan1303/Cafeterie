@@ -4,9 +4,10 @@
   "description": "Application Cafeterie avec Vue.js et Vite",
   "main": "src/main.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+  "dev": "vite",
+  "build": "vite build",
+  "serve": "vite preview",
+  "preview": "vite preview"
   },
   "keywords": [
     "vue",
