@@ -98,6 +98,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useApiFetch } from '../composables/useApiFetch';
+import { apiFetch } from '../utils/api';
 import { useToastStore } from '../store/toastStore';
 import { useUserStore } from '../store/userStore';
 import { usePagination } from '../composables/usePagination';

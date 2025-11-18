@@ -39,8 +39,30 @@
 
 
 
+import { ref, computed } from 'vue';
+import { useUserStore } from '../store/userStore';
 import { useToastStore } from '../store/toastStore';
 import { validateQuantity } from '../utils/validation';
+import { useApiFetch } from '../composables/useApiFetch';
+import { getStock, getStockItem, restockStockItem } from '../utils/api';
+
+import { usePagination } from '../composables/usePagination';
+
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+// Gestion d'erreur globale pour éviter le plantage du site
+try {
+
+} catch (e) {
+  // Affiche une erreur utilisateur et redirige vers l'accueil
+  const toastStore = useToastStore();
+  toastStore.showToast('Erreur critique dans la vue Stock. Redirection...', 'error');
+  setTimeout(() => {
+    router.push('/');
+  }, 1000);
+}
 
 const userStore = useUserStore();
 const toastStore = useToastStore();
@@ -48,6 +70,8 @@ const selected = ref(null);
 const { data: stockRaw, loading, error, fetchData } = useApiFetch(getStock, [userStore.token]);
 const stock = computed(() => Array.isArray(stockRaw.value) ? stockRaw.value : (stockRaw.value?.data || []));
 const { page, pageSize, pageCount, paginatedItems, setPage } = usePagination(stock, 5);
+// totalPages pour compatibilité avec le template
+const totalPages = pageCount;
 
 function stockColorStyle(item) {
   if (typeof item.quantity !== 'number' || typeof item.threshold !== 'number') return {};

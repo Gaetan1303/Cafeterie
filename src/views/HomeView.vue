@@ -1,5 +1,3 @@
-
-
 <template>
   <div>
     <h2>Accueil</h2>
@@ -26,23 +24,8 @@
       </ul>
       <p v-if="sortedAlerts.length === 0">Aucune alerte.</p>
     </section>
-
-    <!-- Machines -->
-    <section style="margin-top:2em">
-      <h3>Machines</h3>
-      <ul>
-        <li v-for="machine in paginatedMachines" :key="machine._id">
-          <b>{{ machine.name }}</b> — {{ machine.type }} ({{ machine.capacity }} {{ machine.unit }}) — État : {{ machine.state }}
-        </li>
-      </ul>
-      <p v-if="paginatedMachines.length === 0">Aucune machine disponible.</p>
-      <button @click="prevPage" :disabled="page === 1">&lt; Précédent</button>
-      Page {{ page }} / {{ totalPages }}
-      <button @click="nextPage" :disabled="page === totalPages">Suivant &gt;</button>
-    </section>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
