@@ -50,19 +50,21 @@
 				</select>
 			</label>
 		</div>
-			<div class="store-grid">
-				<div v-for="item in paginatedStock" :key="item._id" class="store-item">
-					<div :style="stockColorStyle(item)">
-						<b>{{ formatStockName(item) }}</b>
-					</div>
-					<div>
-						<span>Quantité : <b :style="item.quantity <= (item.threshold ?? 0) ? 'color:red' : ''">{{ item.quantity }}</b></span>
-						<span v-if="item.threshold"> / Seuil : <b>{{ item.threshold }}</b></span>
-					</div>
-					<div>Ajouté le <span v-if="item.createdAt || item.timestamp">{{ formatDateTime(item.createdAt || item.timestamp) }}</span><span v-else>-</span></div>
-					<button @click="goToStock(item._id)">Voir détail</button>
-				</div>
+		<!-- Vitrine coffee shop améliorée -->
+		<div class="coffee-showcase">
+			<div v-for="item in paginatedStock" :key="item._id" class="coffee-card">
+				<!-- Badge si seuil atteint -->
+				<div v-if="item.quantity <= (item.threshold ?? 0)" class="badge" style="background: var(--coffee-red)">Stock bas</div>
+				<!-- Image illustrative générique -->
+				<!-- <img :src="`https://placehold.co/180x180/${item.category ? 'c19a6b' : '6f4e37'}/fff?text=${encodeURIComponent(formatStockName(item).charAt(0).toUpperCase())}`" alt="Image de {{ formatStockName(item) }}" /> -->
+				<h3>{{ formatStockName(item) }}</h3>
+				<p class="price" :style="item.quantity <= (item.threshold ?? 0) ? 'color:var(--coffee-red)' : ''">
+					Quantité : <b>{{ item.quantity }}</b>
+				</p>
+				<div style="margin-bottom:1em;">Ajouté le <span v-if="item.createdAt || item.timestamp">{{ formatDateTime(item.createdAt || item.timestamp) }}</span><span v-else>-</span></div>
+				<button class="btn" @click="goToStock(item._id)">Voir détail</button>
 			</div>
+		</div>
 		<div class="pagination">
 			<button @click="prevStockPage" :disabled="stockPage === 1">&lt; Précédent</button>
 			Page {{ stockPage }} / {{ stockPageCount }}
@@ -89,7 +91,7 @@ const stockCategoryFilter = ref('');
 const stockSearch = ref('');
 const stockSort = ref('az');
 const stockPage = ref(1);
-const stockPageSize = ref(8);
+const stockPageSize = ref(30);
 const formatDateTime = useFormatDate().formatDateTime;
 
 const stockCategories = computed(() => {
@@ -230,56 +232,43 @@ function formatStockName(item) {
   if (!item) return '';
   let name = item.type ? item.type : '';
   if (item.subtype) name += ` (${item.subtype})`;
-  if (item.category) name += ` - ${item.category}`;
   return name;
 }
 </script>
 
 <style scoped>
-.store-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	gap: 1.5em;
-	margin: 2em 0;
-}
-.store-item {
-	border: 1px solid #eee;
-	border-radius: 8px;
-	padding: 1em;
-	background: #fafaff;
-	box-shadow: 0 2px 8px #0001;
-	display: flex;
-	flex-direction: column;
-	gap: 0.5em;
-	align-items: flex-start;
-}
-.pagination {
-	margin: 1em 0;
-}
-.btn-modifier {
-	margin-left: 0.5em;
-	color: #fff;
-	background: #2d8cf0;
-	border: none;
-	padding: 0.2em 0.7em;
-	border-radius: 4px;
-}
-.btn-supprimer {
-	margin-left: 0.5em;
-	color: #fff;
-	background: #e74c3c;
-	border: none;
-	padding: 0.2em 0.7em;
-	border-radius: 4px;
-}
 .error {
-	color: red;
+  color: red;
 }
-.stock-filters {
-	margin-bottom: 1em;
-	display: flex;
-	gap: 1em;
-	flex-wrap: wrap;
-	align-items: center;
+
+.coffee-showcase {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 2em;
+}
+
+.coffee-card {
+  min-width: 220px;
+  max-width: 320px;
+  margin-bottom: 1.5em;
+}
+
+@media (max-width: 900px) {
+  .coffee-card {
+    min-width: 160px;
+    max-width: 98vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .coffee-showcase {
+    flex-direction: column;
+    gap: 1em;
+  }
+  .coffee-card {
+    min-width: 90vw;
+    max-width: 99vw;
+    margin-bottom: 1em;
+  }
 }
 </style>

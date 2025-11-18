@@ -3,7 +3,7 @@
     <router-link to="/">Accueil</router-link>
     <router-link to="/auth" v-if="!isLoggedIn">Connexion / Inscription</router-link>
     <router-link to="/dashboard" v-if="isAdmin">Dashboard</router-link>
-    <router-link to="/achat" v-if="isLoggedIn">Pointage achat</router-link>
+    <router-link to="/achat" v-if="isLoggedIn">Achat</router-link>
     <router-link to="/machines" v-if="isLoggedIn">Boire</router-link>
     <router-link to="/events" v-if="isLoggedIn">Évènements</router-link>
     <router-link to="/stock" v-if="isAdmin">Stock</router-link>
@@ -24,6 +24,8 @@ import GlobalToast from './components/GlobalToast.vue';
 import GlobalLoader from './components/GlobalLoader.vue';
 import { useUserStore } from './store/userStore';
 import { useLoaderStore } from './store/loaderStore';
+
+import './views/CSS/coffee-shop.css';
 
 //  Appel sécurisé avec gestion d'erreur
 let userStore = null;
