@@ -1,342 +1,251 @@
 /*
-  Thème Coffee Shop - CSS global responsif et interactif
+  Thème Coffee Shop - CSS Global inspiré par la photo de référence
+  Objectif: Chaleureux, moderne, touches automnales, palette terreuse.
 */
 
+/* ==========================================================================
+   1. VARIABLES & TOKENS (Inspirées de la photo)
+   ========================================================================== */
+
 :root {
-  --coffee-bg: #f7f3ef;
-  --coffee-brown: #6f4e37;
-  --coffee-cream: #f5e9da;
-  --coffee-dark: #3e2723;
-  --coffee-accent: #c19a6b;
-  --coffee-green: #7b9c5c;
-  --coffee-red: #c1440e;
-  --coffee-shadow: 0 4px 24px #3e272320;
+  /* Palette de couleurs basée sur la photo */
+  --color-primary-brown: #6F4E37; /* Marron foncé café */
+  --color-secondary-orange: #C17C5B; /* Orange terreux/rouille, comme les feuilles d'automne */
+  --color-accent-gold: #C29F84; /* Or/Beige clair, comme un café au lait */
+  --color-light-cream: #F5E9DA; /* Crème très clair, fond des posts */
+  --color-dark-text: #3E2723;   /* Texte très foncé, presque noir */
+  --color-off-white: #FCF8F5;   /* Blanc cassé pour les éléments de fond */
+  --color-green-leaf: #7B9C5C;  /* Vert discret, pour un accent ou un logo */
+
+  /* Typographie (inspirée des styles modernes de coffee shop) */
+  --font-heading: 'Pacifico', cursive; /* Pour les titres accrocheurs */
+  --font-body: 'Merriweather', serif;  /* Pour le texte principal, élégant et lisible */
+  --font-alt: 'Arial', sans-serif; /* Fallback ou pour des petits textes techniques */
+
+  /* Ombres et élévation */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  /* Espacements (système 8pt) */
+  --space-xs: 0.5rem;   /* 8px */
+  --space-sm: 1rem;     /* 16px */
+  --space-md: 1.5rem;   /* 24px */
+  --space-lg: 2rem;     /* 32px */
+  --space-xl: 3rem;     /* 48px */
+
+  /* Rayons de bordure */
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
 }
+
+/* ==========================================================================
+   2. TYPOGRAPHIE & BASE Body
+   ========================================================================== */
 
 body {
-  background: var(--coffee-bg);
-  font-family: 'Merriweather', 'Georgia', serif;
-  color: var(--coffee-dark);
+  background-color: var(--color-light-cream); /* Fond général plus clair */
+  font-family: var(--font-body);
+  color: var(--color-dark-text);
   margin: 0;
   min-height: 100vh;
+  padding: 0;
+  line-height: 1.6;
 }
 
-nav {
-  background: var(--coffee-brown);
-  color: #fff;
-  box-shadow: var(--coffee-shadow);
-  padding: 1.2em 0.5em;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5em;
-  border-bottom: 4px solid var(--coffee-accent);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-primary-brown);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
 }
-nav a, nav .router-link-active {
-  color: #fff;
+h1 { font-size: 2.8rem; letter-spacing: 0.05em; }
+h2 { font-size: 2.2rem; }
+h3 { font-size: 1.8rem; }
+h4 { font-size: 1.4rem; }
+
+p {
+  margin-bottom: var(--space-sm);
+}
+
+a {
+  color: var(--color-secondary-orange);
   text-decoration: none;
-  font-weight: 600;
-  padding: 0.4em 1.1em;
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  transition: color 0.2s ease;
 }
-nav a.router-link-exact-active, nav .router-link-exact-active {
-  background: var(--coffee-accent);
-  color: var(--coffee-dark);
-  box-shadow: 0 2px 8px #3e272340;
-}
-nav a:hover {
-  background: var(--coffee-cream);
-  color: var(--coffee-brown);
-  box-shadow: 0 2px 8px #3e272340;
+a:hover {
+  color: var(--color-primary-brown);
+  text-decoration: underline;
 }
 
-/* Vitrine coffee shop */
-.coffee-showcase {
+/* ==========================================================================
+   3. NAVIGATION (Globale) - Inspirée des bandeaux de la photo
+   ========================================================================== */
+
+.nav {
+  background-color: var(--color-primary-brown); /* Fond marron foncé */
+  box-shadow: var(--shadow-medium);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 3px solid var(--color-accent-gold); /* Bordure accent */
+}
+
+.nav__list {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 2em;
-  margin: 2em 0;
-  padding: 0 1em;
+  gap: var(--space-md);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.coffee-card {
-  background: var(--coffee-cream);
-  border-radius: 16px;
-  box-shadow: var(--coffee-shadow), 0 1.5px 8px #c19a6b33;
-  padding: 2em 1.5em;
-  min-width: 260px;
-  max-width: 340px;
-  flex: 1 1 260px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.18s cubic-bezier(.4,1.6,.4,1), box-shadow 0.18s, border-color 0.18s, filter 0.18s;
-  border: 2.5px solid var(--coffee-accent);
-  position: relative;
-  overflow: hidden;
+
+.nav-link {
+  color: var(--color-light-cream); /* Texte clair sur fond foncé */
+  text-decoration: none;
+  font-family: var(--font-body); /* Police plus simple pour la nav */
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  padding: 0.6rem var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
   cursor: pointer;
-  filter: drop-shadow(0 2px 8px #c19a6b22);
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden; /* Pour l'effet de survol */
 }
-.coffee-card.hidden {
-  display: none;
-}
-.coffee-card img {
-  width: 100%;
-  max-width: 180px;
-  height: auto;
-  border-radius: 50%;
-  border: 4px solid var(--coffee-accent);
-  box-shadow: 0 4px 12px #3e272330;
-  margin-bottom: 1em;
-  background-color: #fff;
-  object-fit: cover;
-}
-.coffee-card:hover {
-  transform: translateY(-12px) scale(1.045) rotate(-1deg);
-  box-shadow: 0 12px 36px #3e272340, 0 2px 16px #c19a6b55;
-  border-color: var(--coffee-brown);
-  filter: brightness(1.04) drop-shadow(0 4px 16px #c19a6b44);
-}
-.coffee-card::before {
+
+/* Effet de survol: soulignement doux */
+.nav-link::after {
   content: '';
   position: absolute;
-  top: -40px; left: -40px;
-  width: 80px; height: 80px;
-  background: radial-gradient(circle, #fff8 0%, #fff0 80%);
-  opacity: 0.18;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.coffee-card:hover::before {
-  opacity: 0.32;
-}
-.coffee-card .badge {
-  position: absolute;
-  top: 1.1em; right: 1.1em;
-  background: var(--coffee-green);
-  color: #fff;
-  font-size: 0.95em;
-  font-weight: bold;
-  padding: 0.3em 1em;
-  border-radius: 12px 4px 12px 4px;
-  box-shadow: 0 2px 8px #7b9c5c33;
-  letter-spacing: 0.04em;
-  z-index: 2;
-  animation: badgepop 0.5s;
-}
-@keyframes badgepop {
-  0% { transform: scale(0.7) rotate(-10deg); opacity: 0; }
-  60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
-}
-.coffee-card .btn {
-  margin-top: 1.2em;
-  font-size: 1.13em;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  box-shadow: 0 2px 8px #3e272320;
-  background: linear-gradient(90deg, var(--coffee-accent) 0%, var(--coffee-brown) 100%);
-  border: none;
-  color: #fff;
-  border-radius: 8px;
-  padding: 0.8em 2em;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
-}
-.coffee-card .btn:hover {
-  background: linear-gradient(90deg, var(--coffee-brown) 0%, var(--coffee-accent) 100%);
-  color: var(--coffee-dark);
-  box-shadow: 0 4px 16px #c19a6b55;
-  transform: scale(1.07) translateY(-2px);
-}
-.coffee-card .desc {
-  color: var(--coffee-dark);
-  font-size: 1.08em;
-  margin-bottom: 1em;
-  text-align: center;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-}
-.coffee-card .price {
-  color: var(--coffee-green);
-  font-weight: bold;
-  font-size: 1.18em;
-  margin-bottom: 0.7em;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px #7b9c5c22;
-}
-.coffee-card h3 {
-  margin: 0.5em 0 0.2em 0;
-  color: var(--coffee-brown);
-  font-family: 'Pacifico', cursive, serif;
-  font-size: 1.6em;
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 8px #3e272320;
-}
-
-/* Boutons de filtre */
-.btn-filter {
-  background: var(--coffee-brown);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.7em 1.5em;
-  font-size: 1.1em;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px #3e272320;
-  margin: 0.5em;
-}
-.btn-filter:hover {
-  background: var(--coffee-accent);
-  color: var(--coffee-dark);
-}
-.btn-filter.active-filter {
-  background: var(--coffee-accent);
-  color: var(--coffee-dark);
-  font-weight: bold;
-}
-
-/* Modal de confirmation */
-#confirmation-modal {
-  position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  height: 2px;
+  background-color: var(--color-accent-gold);
+  transform: translateX(-100%);
+  transition: transform 0.2s ease-out;
 }
-.modal-content {
-  background: var(--coffee-cream);
-  padding: 2.5em;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  text-align: center;
-  animation: popin 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+.nav-link:hover::after {
+  transform: translateX(0);
 }
-@keyframes popin {
-  from { transform: scale(0.7); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+
+.nav-link:hover {
+  color: #fff; /* Texte blanc pur au survol */
+  background-color: rgba(255, 255, 255, 0.08); /* Effet de brillance subtile */
+  transform: translateY(-2px); /* Léger mouvement vers le haut */
 }
-.modal-content h4 {
-  color: var(--coffee-brown);
-  font-family: 'Pacifico', cursive;
-  font-size: 1.8em;
-  margin-bottom: 0.5em;
+
+/* État actif (Vue Router Active Link) - Style distinctif */
+.nav-link.router-link-active,
+.nav-link.active {
+  background-color: var(--color-secondary-orange); /* Orange comme les bandeaux promo */
+  color: var(--color-off-white); /* Texte blanc cassé sur l'orange */
+  box-shadow: var(--shadow-subtle);
+  transform: translateY(-2px);
+  border-bottom: 2px solid var(--color-accent-gold);
 }
-.modal-content p {
-  font-size: 1.1em;
-  margin-bottom: 1.5em;
+.nav-link.router-link-active::after,
+.nav-link.active::after {
+    transform: translateX(0); /* Le soulignement reste actif */
+    background-color: var(--color-off-white);
 }
-.modal-content button {
-  background: var(--coffee-green);
-  color: #fff;
-  padding: 0.8em 2em;
+
+/* ==========================================================================
+   4. STRUCTURE DE PAGE (Conteneur principal)
+   ========================================================================== */
+
+.main-content-container {
+  max-width: 1300px; /* Plus large pour correspondre à l'espacement de la photo */
+  margin: 0 auto;
+  padding: var(--space-lg);
+  padding-top: var(--space-xl); /* Plus d'espace pour le contenu principal */
+  background-color: var(--color-off-white); /* Fond du contenu plus clair */
+  box-shadow: var(--shadow-strong); /* Ombre forte pour détacher du body */
+  min-height: calc(100vh - 80px); /* Ajustement pour la hauteur minimale */
+  border-radius: var(--border-radius-lg);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+/* ==========================================================================
+   5. UTILITAIRES (Boutons, Cartes Générales) - Inspirées des "Grab Now"
+   ========================================================================== */
+
+.btn-primary {
+  background-color: var(--color-secondary-orange);
+  color: var(--color-off-white);
+  padding: 0.8rem 1.8rem;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.05rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  box-shadow: var(--shadow-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
-.modal-content button:hover {
-  background: var(--coffee-dark);
+.btn-primary:hover {
+  background-color: var(--color-primary-brown);
+  color: var(--color-light-cream);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
 }
-
-/* Header et filtres */
-.header-content {
-  text-align: center;
-  padding: 2em 1em 1em;
-}
-.header-content h1 {
-  font-family: 'Pacifico', cursive, serif;
-  color: var(--coffee-brown);
-  font-size: 2.8em;
-  margin-bottom: 0.2em;
-  text-shadow: 2px 2px 4px #c19a6b50;
-}
-.header-content p {
-  color: var(--coffee-dark);
-  font-style: italic;
-  font-size: 1.2em;
-  margin-bottom: 1.5em;
-}
-.filter-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  padding: 1em 0;
-  border-top: 1px dashed var(--coffee-accent);
-  border-bottom: 1px dashed var(--coffee-accent);
-  margin: 0 1em;
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-subtle);
 }
 
-
-/* Responsive */
-@media (max-width: 900px) {
-  .coffee-showcase {
-    gap: 1em;
-  }
-  .coffee-card {
-    min-width: 180px;
-    max-width: 98vw;
-    padding: 1.2em 0.7em;
-  }
+.card-base {
+  background-color: #fff;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-subtle);
+  border: 1px solid var(--color-light-cream);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-@media (max-width: 600px) {
-  nav {
+.card-base:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* ==========================================================================
+   6. RESPONSIVE (Global)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .nav__list {
     flex-direction: column;
-    gap: 0.5em;
-    padding: 0.7em 0.2em;
+    gap: var(--space-sm);
+    align-items: stretch;
   }
-  .coffee-showcase {
-    flex-direction: column;
-    gap: 1em;
-    margin: 1em 0;
+  .nav-link {
+    text-align: center;
+    display: block;
+    padding: 0.8rem var(--space-sm);
   }
-  .coffee-card {
-    min-width: 90vw;
-    max-width: 99vw;
-    padding: 1em 0.5em;
+  .main-content-container {
+    padding: var(--space-md);
+    margin: var(--space-md) auto;
   }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.7rem; }
 }
 
-/* Scrollbar stylée */
-::-webkit-scrollbar {
-  width: 10px;
-  background: var(--coffee-cream);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--coffee-accent);
-  border-radius: 6px;
-}
-
-/* Animations d'apparition */
-@keyframes fadein {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.coffee-card, .coffee-showcase > * {
-  animation: fadein 0.5s;
-}
-
-/* Boutons génériques */
-.btn {
-  background: var(--coffee-brown);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.7em 1.5em;
-  font-size: 1.1em;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px #3e272320;
-}
-.btn:hover {
-  background: var(--coffee-accent);
-  color: var(--coffee-dark);
+@media (max-width: 480px) {
+    .main-content-container {
+        padding: var(--space-sm);
+        margin: var(--space-sm) auto;
+    }
+    h1 { font-size: 1.8rem; }
+    .btn-primary {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
 }
