@@ -9,7 +9,7 @@ class ApiClient {
     this.baseUrl = API_BASE_URL;
   }
 
-  async request(endpoint, { method = 'GET', body, token } = {}) {
+  async request(endpoint, { method = 'GET', body, token, cache } = {}) {
     const url = this.baseUrl + (endpoint.startsWith('/') ? endpoint : '/' + endpoint);
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -22,7 +22,8 @@ class ApiClient {
           method,
           headers,
           body: body ? JSON.stringify(body) : undefined,
-          signal: controller.signal
+          signal: controller.signal,
+          ...(cache ? { cache } : {})
         });
         clearTimeout(timeout);
         if (!response.ok) {
@@ -76,7 +77,8 @@ class ApiClient {
     return this.request(`/events/${id}/unparticipate`, { method: 'POST', token });
   }
   async getMachines(token) {
-    return this.request('/machines', { token });
+    // Désactive le cache HTTP pour éviter les réponses 304
+    return this.request('/machines', { token, cache: 'no-store' });
   }
   async getMachine(id, token) {
     return this.request(`/machines/${id}`, { token });
