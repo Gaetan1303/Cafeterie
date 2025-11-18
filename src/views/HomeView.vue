@@ -99,11 +99,13 @@ const paginatedMachines = computed(() => machines.value.slice((page.value-1)*pag
 
 async function fetchMachines() {
   const res = await getMachines(userStore.token);
-  // Accepte un tableau direct ou un objet { machines: [...] }
+  // Accepte un tableau, un objet { machines: [...] }, ou un objet unique
   if (Array.isArray(res)) {
     machines.value = res;
   } else if (res && Array.isArray(res.machines)) {
     machines.value = res.machines;
+  } else if (res && typeof res === 'object') {
+    machines.value = [res];
   } else {
     machines.value = [];
   }
