@@ -38,4 +38,9 @@ export const useUserStore = defineStore('user', {
     isAuthenticated: (state) => !!state.token,
     isAdmin: (state) => state.user && state.user.role === 'admin',
   },
+  // Persistance automatique à l'initialisation du store
+  hydrate() {
+    persistState('user', this);
+  }
 });
+

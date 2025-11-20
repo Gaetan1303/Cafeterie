@@ -13,6 +13,10 @@ const app = createApp(App);
 //  3. Enregistrer Pinia (AVANT tout)
 app.use(pinia);
 
+// Hydrate le userStore après initialisation de Pinia
+import { useUserStore } from './store/userStore';
+useUserStore().persist();
+
 //  4. Enregistrer le router
 app.use(router);
 

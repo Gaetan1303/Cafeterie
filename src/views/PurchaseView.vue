@@ -1,12 +1,41 @@
 <template>
 	<div>
 		<h1>Mes achats</h1>
+		<!-- Bouton pour ouvrir le formulaire d'ajout de produit -->
+		<button class="btn" @click="showAddProductForm = true" style="margin-bottom:1em;">Ajouter un produit</button>
+
+		<!-- Formulaire d'ajout de produit -->
+		<div v-if="showAddProductForm" class="add-product-form">
+			<h3>Ajouter un nouveau produit au stock</h3>
+			<form @submit.prevent="submitAddProduct">
+				<label>Nom (type) :
+					<input v-model="newProduct.type" required />
+				</label>
+				<label>Sous-type :
+					<input v-model="newProduct.subtype" />
+				</label>
+				<label>Catégorie :
+					<input v-model="newProduct.category" />
+				</label>
+				<label>Seuil d'alerte :
+					<input v-model.number="newProduct.threshold" type="number" min="0" />
+				</label>
+				<label>Quantité initiale :
+					<input v-model.number="newProduct.quantity" type="number" min="0" />
+				</label>
+				<button type="submit">Ajouter au stock</button>
+				<button type="button" @click="closeAddProductForm">Annuler</button>
+			</form>
+		</div>
+
 		<ul>
 			<li v-for="p in paginatedItems" :key="p._id">
 				{{ p.quantity }} x
 				<span v-if="p.stockItem">
 					<b>{{ formatStockName(p.stockItem) }}</b>
 					<button @click="goToStock(p.stockItem._id)">Voir stock</button>
+					<!-- Bouton Rajouter -->
+					<button @click="openReAddForm(p.stockItem)">Rajouter</button>
 				</span>
 				<span v-else>Item inconnu</span>
 				le {{ formatDateTime(p.timestamp) }}
@@ -15,6 +44,19 @@
 				<button @click="deletePurchase(p._id)" class="btn-supprimer">Supprimer</button>
 			</li>
 		</ul>
+
+		<!-- Formulaire Rajouter -->
+		<div v-if="showReAddForm" class="readd-form">
+			<h3>Racheter : {{ formatStockName(reAddItem) }}</h3>
+			<form @submit.prevent="submitReAdd">
+				<label>Quantité :
+					<input v-model.number="reAddQuantity" type="number" min="1" required />
+				</label>
+				<button type="submit">Valider l'achat</button>
+				<button type="button" @click="closeReAddForm">Annuler</button>
+			</form>
+		</div>
+
 		<h2>Nouvel achat</h2>
 		<form @submit.prevent="submitPurchase">
 			<select v-model="purchase.stockItem" required>
@@ -227,48 +269,207 @@ async function submitPurchase() {
 	}
 }
 
+// Pour le formulaire Rajouter
+import { ref as vueRef } from 'vue';
+const showReAddForm = vueRef(false);
+const reAddItem = vueRef(null);
+const reAddQuantity = vueRef(1);
+
+function openReAddForm(item) {
+  reAddItem.value = item;
+  reAddQuantity.value = 1;
+  showReAddForm.value = true;
+}
+function closeReAddForm() {
+  showReAddForm.value = false;
+  reAddItem.value = null;
+  reAddQuantity.value = 1;
+}
+async function submitReAdd() {
+  if (!reAddItem.value || reAddQuantity.value < 1) return;
+  try {
+    await createPurchase({ stockItem: reAddItem.value._id, quantity: reAddQuantity.value }, userStore.token);
+    toastStore.showToast('Achat ajouté !', 'success');
+    fetchData();
+    closeReAddForm();
+  } catch (e) {
+    toastStore.showToast(e?.message || 'Erreur lors de l\'ajout', 'error');
+  }
+}
+
+// Ajout d'un produit au stock
+const showAddProductForm = ref(false);
+const newProduct = ref({ type: '', subtype: '', category: '', threshold: 0, quantity: 0 });
+
+function closeAddProductForm() {
+  showAddProductForm.value = false;
+  newProduct.value = { type: '', subtype: '', category: '', threshold: 0, quantity: 0 };
+}
+
+async function submitAddProduct() {
+  try {
+    // À adapter selon l'API backend (ex: POST /stock)
+    await apiFetch('/stock', {
+      method: 'POST',
+      body: newProduct.value,
+      token: userStore.token
+    });
+    toastStore.showToast('Produit ajouté au stock !', 'success');
+    fetchData();
+    closeAddProductForm();
+  } catch (e) {
+    toastStore.showToast(e?.message || 'Erreur lors de l\'ajout du produit', 'error');
+  }
+}
+
 // Fonction utilitaire pour nom générique
 function formatStockName(item) {
   if (!item) return '';
   let name = item.type ? item.type : '';
-  if (item.subtype) name += ` (${item.subtype})`;
-  return name;
+  if (item.subtype) name += ' ' + item.subtype;
+  if (item.category && (!item.type || item.category !== item.type)) name += ' (' + item.category + ')';
+  return name.trim();
 }
 </script>
 
 <style scoped>
-.error {
-  color: red;
+.readd-form {
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	padding: 1em;
+	margin: 1em 0;
+	background: #f9f9f9;
+}
+.readd-form h3 {
+	margin-top: 0;
+}
+.readd-form label {
+	display: block;
+	margin-bottom: 0.5em;
+}
+.readd-form input {
+	padding: 0.5em;
+	font-size: 1em;
+	width: calc(100% - 1em);
+	margin-bottom: 1em;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+.readd-form button {
+	padding: 0.7em 1.2em;
+	font-size: 1em;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.readd-form button[type="submit"] {
+	background: var(--coffee-green);
+	color: white;
+}
+.readd-form button[type="button"] {
+	background: #ccc;
+	color: black;
+}
+.readd-form button:hover {
+	opacity: 0.9;
 }
 
+/* Styles spécifiques à la page des achats */
+h1 {
+	font-size: 2em;
+	margin-bottom: 0.5em;
+}
+h2 {
+	font-size: 1.5em;
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+}
+h3 {
+	font-size: 1.2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+ul {
+	list-style-type: none;
+	padding: 0;
+}
+li {
+	padding: 0.5em 0;
+	border-bottom: 1px solid #eee;
+}
+.price {
+	font-weight: bold;
+}
+.btn-modifier {
+	background: var(--coffee-yellow);
+	color: black;
+}
+.btn-supprimer {
+	background: var(--coffee-red);
+	color: white;
+}
+.btn {
+	background: var(--coffee-blue);
+	color: white;
+	padding: 0.7em 1.2em;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.btn:hover {
+	opacity: 0.9;
+}
+
+/* Vitrine coffee shop */
 .coffee-showcase {
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 2em;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 1em;
 }
-
 .coffee-card {
-  min-width: 220px;
-  max-width: 320px;
-  margin-bottom: 1.5em;
+	background: white;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 1em;
+	text-align: center;
+	position: relative;
+}
+.coffee-card h3 {
+	font-size: 1.1em;
+	margin: 0.5em 0;
+}
+.coffee-card .price {
+	font-size: 1.2em;
+	margin: 0.5em 0;
+}
+.coffee-card .badge {
+	position: absolute;
+	top: 0.5em;
+	right: 0.5em;
+	padding: 0.3em 0.5em;
+	font-size: 0.8em;
+	color: white;
+	border-radius: 4px;
 }
 
-@media (max-width: 900px) {
-  .coffee-card {
-    min-width: 160px;
-    max-width: 98vw;
-  }
+/* Formulaire d'ajout de produit */
+.add-product-form {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 1.5em;
+  max-width: 340px;
+  margin: 2em auto;
+  text-align: center;
 }
-
-@media (max-width: 600px) {
-  .coffee-showcase {
-    flex-direction: column;
-    gap: 1em;
-  }
-  .coffee-card {
-    min-width: 90vw;
-    max-width: 99vw;
-    margin-bottom: 1em;
-  }
+.add-product-form input {
+  width: 90%;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.add-product-form button {
+  margin: 0.5em 0.5em 0 0;
 }
 </style>

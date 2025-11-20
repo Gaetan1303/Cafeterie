@@ -25,7 +25,8 @@ import GlobalLoader from './components/GlobalLoader.vue';
 import { useUserStore } from './store/userStore';
 import { useLoaderStore } from './store/loaderStore';
 
-import './views/CSS/coffee-shop.css';
+// import './views/CSS/coffee-shop.css';
+import LoginForm from './components/LoginForm.vue';
 
 //  Appel sécurisé avec gestion d'erreur
 let userStore = null;

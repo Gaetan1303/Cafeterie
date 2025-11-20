@@ -3,9 +3,10 @@ import { useErrorStore } from '../store/errorStore'
 
 const API_BASE_URL = 'https://cafeterie-back.onrender.com';
 
+// On passe une fonction qui retourne le store, pour éviter l'appel prématuré
 class ApiClient {
-  constructor(errorStore) {
-    this.errorStore = errorStore;
+  constructor(getErrorStore) {
+    this.getErrorStore = getErrorStore;
     this.baseUrl = API_BASE_URL;
   }
 
@@ -40,8 +41,9 @@ class ApiClient {
   }
 
   handleError(error) {
-    if (this.errorStore && typeof this.errorStore.setError === 'function') {
-      this.errorStore.setError(error);
+    const errorStore = this.getErrorStore ? this.getErrorStore() : null;
+    if (errorStore && typeof errorStore.setError === 'function') {
+      errorStore.setError(error);
     }
   }
 
@@ -96,7 +98,7 @@ class ApiClient {
 
 
 // Instance unique (Singleton, DIP)
-export const apiClient = new ApiClient(useErrorStore());
+export const apiClient = new ApiClient(() => useErrorStore());
 
 // Pour compatibilité ascendante (remplacement progressif)
 export const apiFetch = (...args) => apiClient.request(...args);

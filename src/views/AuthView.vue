@@ -10,7 +10,6 @@
 import LoginForm from '../components/LoginForm.vue';
 import RegisterForm from '../components/RegisterForm.vue';
 import { useUserStore } from '../store/userStore';
-import '../views/CSS/coffee-shop.css';
 
 export default {
   name: 'AuthView',
